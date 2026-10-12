@@ -1,0 +1,785 @@
+<!--
+LAMIA BIRTHDAY WEBSITE — CODE MAP
+============================================================
+1. CSS COLORS / GLOBAL DESIGN       -> inside <style>, near the top
+2. CAKE CSS                         -> section "05 — CAKE DESIGN"
+3. CAKE HTML                        -> section "06 — CAKE SCENE", inside #cake
+4. BACKGROUND MUSIC / VOLUME        -> JavaScript function startCalmMusic()
+5. BIRTHDAY RECORDING               -> CONFIG.birthdayAudio + playBirthdayAudio()
+6. PERSONAL LETTER                  -> CONFIG.letter
+7. FAMILY PHOTO                     -> CONFIG.familyPhoto and #photoScene
+8. BIRTHDAY CODE                    -> CONFIG.birthdayCode
+============================================================
+Keep the filenames in the same folder as index.html.
+-->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050403">
+<title>🎉​ Lamia — Joyeux anniversaire</title>
+<style>
+/* =========================================================
+   01 — GLOBAL DESIGN / COLORS / TYPOGRAPHY
+   Change the colors in :root to restyle the whole website.
+   ========================================================= */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Great+Vibes&family=Inter:wght@300;400;500;600&display=swap');
+:root{--bg:#050403;--gold:#d6bb7c;--gold2:#f1dba8;--cream:#f4eee2;--muted:#9d9589;--line:rgba(214,187,124,.24);--ease:cubic-bezier(.22,1,.36,1)}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--cream);font-family:Inter,Arial,sans-serif}
+button,input{font:inherit}button{color:inherit}.scene{position:fixed;inset:0;opacity:0;visibility:hidden;pointer-events:none;transition:opacity 1.2s var(--ease),visibility 1.2s}.scene.active{opacity:1;visibility:visible;pointer-events:auto}
+.bg{position:absolute;inset:-10%;background:radial-gradient(circle at 50% 42%,rgba(214,187,124,.09),transparent 28%),radial-gradient(circle at 15% 80%,rgba(255,255,255,.025),transparent 25%),#050403}
+.noise{position:fixed;inset:0;z-index:100;pointer-events:none;opacity:.055;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.7'/%3E%3C/svg%3E")}
+.vignette{position:fixed;inset:0;z-index:90;pointer-events:none;background:radial-gradient(circle,transparent 35%,rgba(0,0,0,.76))}
+.center{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px}.content{position:relative;z-index:3;display:flex;flex-direction:column;align-items:center}
+.serif,h1,h2,h3{font-family:"Cormorant Garamond",Georgia,serif;font-weight:400}.eyebrow{font-size:9px;letter-spacing:.36em;text-transform:uppercase;color:var(--gold);margin-bottom:18px}.goldline{height:1px;width:0;background:linear-gradient(90deg,transparent,var(--gold),transparent);transition:width 1.2s var(--ease)}.scene.active .goldline{width:180px}
+.small{font-size:9px;letter-spacing:.14em;color:var(--muted)}.btn{border:1px solid var(--line);background:rgba(255,255,255,.025);padding:14px 27px;border-radius:999px;text-transform:uppercase;letter-spacing:.2em;font-size:9px;cursor:pointer;transition:.4s var(--ease);backdrop-filter:blur(15px)}.btn:hover{border-color:rgba(214,187,124,.65);background:rgba(214,187,124,.07);transform:translateY(-2px);box-shadow:0 12px 40px rgba(214,187,124,.09)}.btn:active{transform:scale(.97)}
+.hidden{display:none!important}
+
+/* boot */
+#boot .content{gap:14px}.boot-mark{font-size:10px;letter-spacing:.46em;color:var(--gold)}.boot-bar{width:230px;height:1px;background:rgba(255,255,255,.08);overflow:hidden}.boot-bar i{display:block;height:100%;width:0;background:var(--gold);animation:load 2.2s var(--ease) forwards}@keyframes load{to{width:100%}}.boot-status{font-size:8px;letter-spacing:.25em;color:#6d675f;text-transform:uppercase}
+
+/* access */
+.access-title{font-size:clamp(65px,14vw,150px);line-height:.72;letter-spacing:-.055em}.access-sub{max-width:420px;color:var(--muted);font-size:11px;line-height:1.8;margin:29px 0 8px}.keypad{width:min(315px,90vw);margin-top:24px}.code-display{height:34px;display:flex;justify-content:center;gap:11px;margin-bottom:15px}.dot{width:7px;height:7px;border:1px solid #776e61;border-radius:50%;transition:.25s}.dot.on{background:var(--gold);border-color:var(--gold);box-shadow:0 0 15px rgba(214,187,124,.5)}.keys{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.key{aspect-ratio:1.7;border:1px solid rgba(255,255,255,.08);border-radius:8px;background:rgba(255,255,255,.025);cursor:pointer;font-family:"Cormorant Garamond";font-size:24px;transition:.25s;user-select:none}.key span{display:block;font-family:Inter;font-size:6px;letter-spacing:.18em;color:#716b63;margin-top:-1px}.key:hover{background:rgba(214,187,124,.07);border-color:var(--line)}.key:active{transform:scale(.94)}.access-error{height:17px;margin-top:10px;font-size:8px;letter-spacing:.15em;color:#a17a6d;text-transform:uppercase}
+
+/* verification/reveal */
+.verify-ring{width:110px;height:110px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center}.check{font-size:29px;color:var(--gold);opacity:0;transform:scale(.4);transition:1s var(--ease)}.scene.active .check{opacity:1;transform:scale(1);transition-delay:.45s}.verify-text{margin-top:28px}.verify-text h2{font-size:45px}.verify-text p{font-size:9px;letter-spacing:.3em;color:var(--muted);margin-top:8px;text-transform:uppercase}
+.reveal-orb{position:absolute;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(214,187,124,.13),transparent 67%);animation:pulse 4s ease-in-out infinite}@keyframes pulse{50%{transform:scale(1.18);opacity:.6}}.reveal-logo{font-size:clamp(75px,17vw,185px);line-height:.7;letter-spacing:-.065em}.reveal-sub{margin-top:32px;font-size:9px;letter-spacing:.45em;text-transform:uppercase;color:var(--gold)}
+.interlude-word{font-size:clamp(42px,8vw,88px);opacity:.7}.interlude-line{margin-top:20px;width:0;height:1px;background:var(--gold);animation:grow 1.4s var(--ease) .5s forwards}@keyframes grow{to{width:120px}}
+
+/* music visual */
+.music-control{position:fixed;right:19px;bottom:18px;z-index:70;width:37px;height:37px;border-radius:50%;border:1px solid rgba(214,187,124,.2);background:rgba(8,7,6,.6);display:grid;place-items:center;cursor:pointer;opacity:.75;backdrop-filter:blur(10px)}.music-bars{display:flex;gap:2px;align-items:center;height:13px}.music-bars i{width:2px;height:6px;background:var(--gold);animation:bars .8s ease-in-out infinite alternate}.music-bars i:nth-child(2){height:11px;animation-delay:.15s}.music-bars i:nth-child(3){height:8px;animation-delay:.3s}@keyframes bars{to{transform:scaleY(.35)}}.music-control.paused .music-bars i{animation-play-state:paused;transform:scaleY(.5)}
+
+/* wish / blow button (kept from original) */
+.wish-copy h2{font-size:clamp(37px,7vw,64px)}.wish-copy p{font-size:11px;color:var(--muted);max-width:420px;line-height:1.85;margin:10px auto 22px}.blow-button{display:inline-flex;align-items:center;gap:9px}.blow-icon{width:18px;height:18px;border:1px solid var(--gold);border-radius:50%;display:grid;place-items:center;font-size:8px}.blow-button.blowing{animation:blowpulse .8s infinite}@keyframes blowpulse{50%{box-shadow:0 0 35px rgba(214,187,124,.18)}}.mic-note{font-size:7px;letter-spacing:.14em;color:#6f685e;text-transform:uppercase;margin-top:11px;min-height:10px}
+
+/* audio sequence */
+.audio-scene-title{font-size:clamp(48px,10vw,110px);line-height:.8}.soundwave{height:70px;display:flex;align-items:center;justify-content:center;gap:4px;margin-top:30px}.soundwave i{width:2px;height:12px;background:var(--gold);opacity:.65;animation:wave .9s ease-in-out infinite alternate}.soundwave i:nth-child(2n){animation-delay:.12s}.soundwave i:nth-child(3n){animation-delay:.24s}@keyframes wave{to{height:42px;opacity:.25}}.audio-caption{font-size:9px;letter-spacing:.32em;color:var(--muted);text-transform:uppercase;margin-top:22px}
+
+/* memories */
+.memories{width:min(1050px,94vw);display:flex;flex-direction:column;align-items:center}.mem-title{font-size:clamp(43px,7vw,75px);margin-bottom:30px}.memory-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;width:100%}.memory{height:350px;position:relative;overflow:hidden;border:1px solid rgba(214,187,124,.16);background:#111;cursor:pointer;transition:.6s var(--ease)}.memory:hover{transform:translateY(-7px);border-color:rgba(214,187,124,.45)}.memory img{width:100%;height:100%;object-fit:cover;opacity:.58;filter:grayscale(.18);transition:.8s}.memory:hover img{transform:scale(1.06);opacity:.8}.memory:after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 35%,rgba(0,0,0,.92))}.memory-info{position:absolute;bottom:21px;left:21px;z-index:2;text-align:left}.memory-info span{font-size:7px;letter-spacing:.25em;color:var(--gold);text-transform:uppercase}.memory-info h3{font-size:27px;margin-top:4px}.memory-info p{font-size:8px;color:#aaa;margin-top:3px}.photo-placeholder{position:absolute;inset:0;display:grid;place-items:center;background:radial-gradient(circle at 50% 35%,rgba(214,187,124,.15),transparent 30%),linear-gradient(145deg,#191714,#080807)}.photo-placeholder b{font-family:"Cormorant Garamond";font-size:40px;color:rgba(214,187,124,.4);font-weight:400}
+
+/* letter */
+.letter-wrap{width:min(820px,94vw);height:min(78vh,720px);overflow:auto;scrollbar-width:none}.letter-wrap::-webkit-scrollbar{display:none}.letter{background:linear-gradient(145deg,#e8deca,#f5ecdc);color:#211d17;min-height:100%;padding:clamp(42px,7vw,78px);text-align:left;box-shadow:0 30px 100px rgba(0,0,0,.55);position:relative}.letter:before{content:"";position:absolute;inset:14px;border:1px solid rgba(89,67,39,.15);pointer-events:none}.letter-top{text-align:center;margin-bottom:32px}.letter-top span{font-size:7px;letter-spacing:.35em;color:#88765c;text-transform:uppercase}.letter h2{font-size:58px;margin-top:7px}.letter-body{font-family:"Cormorant Garamond";font-size:25px;line-height:1.82;letter-spacing:.005em;white-space:pre-line}.signature{margin-top:32px;font-family:"Cormorant Garamond";font-size:28px;font-style:italic}.letter-reveal{animation:letterIn 1.2s var(--ease) .35s both}@keyframes letterIn{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+
+.love-button{position:relative;z-index:9;margin:26px 0 0;padding:16px 34px;border-radius:999px;background:rgba(8,7,6,.82);border:1px solid rgba(215,189,131,.4);backdrop-filter:blur(16px);white-space:nowrap;overflow:hidden;box-shadow:0 16px 45px rgba(0,0,0,.6);animation:loveGlow 3s ease-in-out infinite}.love-button:hover{transform:translateY(-3px) scale(1.03);border-color:rgba(214,187,124,.75)}.love-button strong{font-family:"Cormorant Garamond";font-size:21px;font-weight:400;letter-spacing:.02em;position:relative;z-index:2}.love-button:before{content:"";position:absolute;top:0;left:-60%;width:45%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,240,200,.4),transparent);transform:skewX(-18deg);animation:loveShine 3.4s ease-in-out infinite}@keyframes loveShine{0%{left:-60%}55%,100%{left:140%}}@keyframes loveGlow{0%,100%{box-shadow:0 16px 45px rgba(0,0,0,.6),0 0 0 rgba(214,187,124,0)}50%{box-shadow:0 16px 45px rgba(0,0,0,.6),0 0 30px rgba(214,187,124,.4)}}
+.heart{position:fixed;z-index:85;pointer-events:none;font-size:20px;animation:heartRise var(--hd) ease-out forwards}@keyframes heartRise{0%{opacity:0;transform:translateY(0) scale(.4)}18%{opacity:1}100%{opacity:0;transform:translate(var(--hx),-320px) scale(1.1) rotate(var(--hr))}}
+/* final */
+.final-name{font-size:clamp(75px,16vw,180px);letter-spacing:-.065em;line-height:.7}.final-quote{font-family:"Cormorant Garamond";font-size:clamp(19px,3vw,28px);font-style:italic;color:#c9c0b2;margin-top:34px;max-width:610px}.final-by{margin-top:30px;font-size:7px;letter-spacing:.42em;text-transform:uppercase;color:#716b62}
+
+/* particles/confetti/modal */
+.particles{position:absolute;inset:0;overflow:hidden;pointer-events:none}.particles i{position:absolute;width:2px;height:2px;border-radius:50%;background:rgba(235,214,170,.65);left:var(--x);top:var(--y);animation:twinkle var(--t) ease-in-out infinite alternate}@keyframes twinkle{to{opacity:.08;transform:scale(.3)}}
+.confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:59}.confetti i{position:absolute;width:3px;height:12px;background:var(--gold);top:-20px;animation:fall var(--d) linear forwards;left:var(--x);transform:rotate(var(--r))}@keyframes fall{to{top:110%;transform:translateX(var(--drift)) rotate(720deg)}}
+.modal{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.72);display:none;place-items:center;padding:25px;backdrop-filter:blur(15px)}.modal.show{display:grid}.modal-card{width:min(600px,94vw);background:#100f0d;border:1px solid var(--line);padding:45px;text-align:center}.modal-card h3{font-size:42px}.modal-card p{font-family:"Cormorant Garamond";font-size:22px;line-height:1.5;color:#c8bfb0;margin:18px auto 25px}.modal-close{position:absolute;right:18px;top:16px;border:0;background:none;color:#81796e;cursor:pointer;font-size:16px}
+.audio-status{position:fixed;left:18px;bottom:18px;z-index:70;display:flex;align-items:center;gap:8px;opacity:.65}.audio-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 12px var(--gold)}.audio-status span{font-size:7px;letter-spacing:.2em;color:#8b8378;text-transform:uppercase}
+
+/* family photo */
+.family-frame{position:relative;width:100vw;max-width:1200px;height:calc(100vh - 210px);min-height:360px;display:flex;align-items:center;justify-content:center}
+.family-frame img{width:auto;height:auto;max-width:94vw;max-height:calc(100vh - 240px);object-fit:contain;padding:10px;background:#0b0a08;border:1px solid rgba(215,189,131,.28);box-shadow:0 35px 110px rgba(0,0,0,.78);animation:familyIn 1.1s var(--ease) both}@keyframes familyIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:none}}
+#photoScene .center{padding:16px}#photoScene .content{justify-content:center;gap:0}
+
+/* volume panel + audio button polish */
+.volume-panel{position:fixed;right:64px;bottom:18px;z-index:76;width:185px;padding:11px 13px;border:1px solid rgba(215,189,131,.18);background:rgba(8,7,6,.86);backdrop-filter:blur(16px);border-radius:12px;display:flex;align-items:center;gap:10px;opacity:0;visibility:hidden;transform:translateY(7px);transition:.3s var(--ease)}
+.volume-panel.show{opacity:1;visibility:visible;transform:none}.volume-panel span{font-size:8px;color:#8e867b;letter-spacing:.14em}.volume-panel input{width:100%;accent-color:var(--gold);cursor:pointer}
+.start-audio-premium{display:flex!important;width:max-content;min-width:245px;justify-content:center;align-items:center;margin:34px auto 0!important;position:relative;left:auto;right:auto}
+.start-audio-premium:hover{transform:translateY(-2px)}
+.audio-scene-title + .soundwave{margin-top:34px}
+.audio-caption{max-width:560px;margin-left:auto;margin-right:auto;text-align:center}
+
+/* celebration */
+#celebration.active .content{animation:celebrateEntrance 1.2s cubic-bezier(.2,.8,.2,1) both}
+#celebration .audio-scene-title{font-size:clamp(52px,9vw,112px)!important;line-height:.95!important;letter-spacing:.08em!important;text-shadow:0 0 55px rgba(226,179,116,.2)}
+#celebration .reveal-sub{font-size:clamp(24px,4vw,40px)!important;letter-spacing:.22em!important}
+#celebration .from-brother{margin-top:18px;font-family:"Cormorant Garamond",Georgia,serif;font-style:italic;font-size:clamp(15px,2.2vw,22px);letter-spacing:.08em;color:#c9c0b2;opacity:0;animation:fromBrotherIn 1.1s var(--ease) 1.1s both}
+#celebration .from-brother:before{content:"";display:block;width:0;height:1px;margin:0 auto 14px;background:linear-gradient(90deg,transparent,var(--gold),transparent);animation:fromBrotherLine 1.2s var(--ease) 1.3s forwards}
+@keyframes fromBrotherIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes fromBrotherLine{to{width:130px}}
+
+/* =========================================================
+   FROM-BROTHER SIGNATURE SCREEN (shown after the family audio)
+   ========================================================= */
+#fromBrother .bg{background:radial-gradient(ellipse at 50% 42%,rgba(214,187,124,.14),transparent 52%),linear-gradient(180deg,#0a0908,#050403)}
+#fromBrother .content{gap:0}
+#fromBrother .eyebrow{margin-bottom:26px}
+#fromBrother .fb-line{font-family:"Cormorant Garamond",Georgia,serif;font-style:italic;font-size:clamp(20px,3.4vw,34px);color:#d9d0c2;max-width:640px;line-height:1.5;opacity:0}
+#fromBrother.active .fb-line{animation:fromBrotherIn 1.2s var(--ease) .3s both}
+#fromBrother .fb-sign{margin-top:22px;position:relative;padding:0 10px;font-family:'Great Vibes',"Cormorant Garamond",cursive;font-size:clamp(58px,12vw,110px);line-height:1.15;color:var(--gold2);text-shadow:0 0 24px rgba(214,187,124,.4);clip-path:inset(0 100% 0 0)}
+#fromBrother.active .fb-sign{animation:writeIn 2.4s var(--ease) .9s forwards}
+@keyframes writeIn{to{clip-path:inset(0 0 0 0)}}
+#fromBrother .fb-sign:after{content:"";position:absolute;left:10%;right:10%;bottom:2px;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);transform:scaleX(0);transform-origin:left}
+#fromBrother.active .fb-sign:after{animation:signUnderline 1.2s var(--ease) 3.1s forwards}
+@keyframes signUnderline{to{transform:scaleX(1)}}
+#fromBrother .fb-from{margin-top:6px;font-size:9px;letter-spacing:.42em;text-transform:uppercase;color:var(--gold);opacity:0}
+#fromBrother.active .fb-from{animation:fromBrotherIn 1.1s var(--ease) 3.1s both}
+#fromBrother .fb-next{margin-top:34px;opacity:0}
+#fromBrother.active .fb-next{animation:fromBrotherIn 1.1s var(--ease) 3.7s both}
+/* soft light bloom behind the signature */
+.fb-glow{position:absolute;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,rgba(214,187,124,.16),transparent 66%);animation:pulse 5s ease-in-out infinite;pointer-events:none}
+
+/* =========================================================
+   FIREWORKS (canvas) — celebration screen
+   ========================================================= */
+#fxCanvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:60}
+
+/* =========================================================
+   SHOOTING STARS + SPECIAL SURPRISE — final screen
+   ========================================================= */
+.shooting-star{position:absolute;top:var(--sy);left:var(--sx);width:3px;height:3px;border-radius:50%;background:#fff6dd;box-shadow:0 0 8px 2px rgba(255,240,200,.85);opacity:0;animation:shoot var(--sd) ease-in infinite;animation-delay:var(--sdel)}
+.shooting-star:after{content:"";position:absolute;top:50%;right:0;width:130px;height:1px;transform:translateY(-50%);background:linear-gradient(90deg,rgba(255,240,200,.9),transparent)}
+@keyframes shoot{0%{opacity:0;transform:translate(0,0) rotate(18deg)}8%{opacity:1}45%{opacity:1}60%,100%{opacity:0;transform:translate(-340px,120px) rotate(18deg)}}
+
+/* the special surprise — a twinkling star that reveals a secret */
+#secretStar{position:absolute;right:8%;bottom:12%;z-index:6;width:26px;height:26px;cursor:pointer;opacity:.55;transition:.4s var(--ease);filter:drop-shadow(0 0 6px rgba(214,187,124,.6))}
+#secretStar:hover{opacity:1;transform:scale(1.25) rotate(20deg)}
+#secretStar:before{content:"✦";font-size:24px;color:var(--gold2);display:block;line-height:26px;text-align:center;animation:pulse 2.6s ease-in-out infinite}
+.secret-card{position:fixed;inset:0;z-index:88;display:none;place-items:center;padding:26px;background:rgba(0,0,0,.78);backdrop-filter:blur(16px)}
+.secret-card.show{display:grid;animation:fromBrotherIn .6s var(--ease) both}
+.secret-inner{width:min(560px,92vw);text-align:center;border:1px solid var(--line);background:linear-gradient(160deg,rgba(20,18,15,.96),rgba(8,7,6,.96));padding:clamp(30px,6vw,54px);box-shadow:0 40px 120px rgba(0,0,0,.7)}
+.secret-inner .s-eyebrow{font-size:8px;letter-spacing:.4em;text-transform:uppercase;color:var(--gold)}
+.secret-inner h3{font-family:"Cormorant Garamond",Georgia,serif;font-weight:400;font-size:clamp(30px,5vw,46px);margin:14px 0 14px}
+.secret-inner p{font-family:"Cormorant Garamond",Georgia,serif;font-size:clamp(18px,2.6vw,24px);line-height:1.6;color:#cfc6b7}
+.secret-inner .s-sign{margin-top:20px;font-style:italic;color:var(--gold2);font-family:"Cormorant Garamond",Georgia,serif;font-size:20px}
+.secret-close{margin-top:26px}
+@keyframes celebrateEntrance{from{opacity:0;transform:translateY(24px) scale(.96);filter:blur(8px)}to{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}}
+
+@media(max-width:720px){.memory-grid{grid-template-columns:1fr;max-height:55vh;overflow:auto;padding:0 5px}.memory{height:190px}.letter-body{font-size:20px;line-height:1.72}.letter h2{font-size:48px}.letter{padding:35px 28px}.music-control{right:14px;bottom:14px}.volume-panel{right:61px;width:155px}.family-frame{height:calc(100vh - 190px);min-height:300px}.love-button{margin-top:20px;min-width:210px;padding:14px 26px}.love-button strong{font-size:18px}.start-audio-premium{min-width:215px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
+
+/* =========================================================
+   05 — CAKE DESIGN  (single, clean implementation)
+   Two-tier ivory cake with a golden drip glaze, three candles.
+   The cake HTML is in #cakeScene below. The blow-out animation
+   is triggered by adding the class "extinguished" to #cake.
+   ========================================================= */
+#cakeScene .bg{
+  background:
+    radial-gradient(ellipse at 50% 46%,rgba(214,187,124,.16),transparent 46%),
+    radial-gradient(ellipse at 50% 90%,rgba(0,0,0,.5),transparent 60%),
+    linear-gradient(180deg,#0a0908 0%,#070606 60%,#050403 100%);
+}
+#cakeScene .center{padding:12px}
+#cakeScene .cake-stage{
+  width:min(620px,96vw);
+  height:clamp(400px,58vh,560px);
+  display:flex;align-items:flex-end;justify-content:center;
+  position:relative;overflow:visible;margin:0 auto;
+}
+#cakeScene .table-glow{
+  position:absolute;left:50%;bottom:4px;transform:translateX(-50%);
+  width:min(560px,94vw);height:120px;
+  background:radial-gradient(ellipse at center,rgba(0,0,0,.55),transparent 70%);
+  filter:blur(14px);
+}
+
+/* ---- the cake wrapper (keeps id="cake" for the blow-out JS) ---- */
+#cakeScene #cake.lc-cake{
+  position:relative;
+  width:480px;height:450px;flex:0 0 auto;
+  transform-origin:center bottom;
+  animation:lcFloat 6s ease-in-out infinite;
+  filter:drop-shadow(0 26px 24px rgba(0,0,0,.45));
+}
+@keyframes lcFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+
+/* ---- porcelain plate ---- */
+#cakeScene .lc-plate{
+  position:absolute;left:50%;bottom:0;transform:translateX(-50%);
+  width:462px;height:70px;border-radius:50%;
+  background:
+    radial-gradient(ellipse at 50% 16%,rgba(255,255,255,.95),transparent 55%),
+    linear-gradient(180deg,#fdf9f1 0%,#ece0cc 42%,#cbbda1 70%,#9a8d74 100%);
+  box-shadow:0 20px 34px rgba(0,0,0,.55),inset 0 4px 6px rgba(255,255,255,.85);
+}
+#cakeScene .lc-plate::after{
+  content:"";position:absolute;inset:10px 40px;border-radius:50%;
+  border:1px solid rgba(150,128,86,.4);
+  box-shadow:inset 0 5px 9px rgba(255,255,255,.7),inset 0 -4px 9px rgba(120,100,60,.28);
+}
+
+/* ---- tiers ---- */
+#cakeScene .lc-tier{position:absolute;left:50%;transform:translateX(-50%);}
+
+/* cylinder body (ivory buttercream) */
+#cakeScene .lc-tier .lc-side{
+  position:absolute;left:0;bottom:0;width:100%;height:100%;
+  border-radius:16px 16px 32px 32px;
+  background:linear-gradient(90deg,
+      #c7a878 0%,#e6d3b0 15%,#f6ecd4 37%,#fbf3de 50%,#f1e3c6 63%,#ddc6a0 85%,#bd9c6e 100%);
+  box-shadow:
+    inset 0 -24px 32px rgba(120,88,48,.28),
+    inset 0 8px 12px rgba(255,255,255,.45),
+    0 10px 16px rgba(0,0,0,.18);
+}
+/* top surface (golden glaze) */
+#cakeScene .lc-tier .lc-top{
+  position:absolute;left:0;width:100%;border-radius:50%;z-index:2;
+  background:radial-gradient(ellipse at 40% 32%,#f8e3ac,#e7c07a 55%,#bd8b3f 100%);
+  box-shadow:inset 0 4px 9px rgba(255,255,255,.55),inset 0 -7px 14px rgba(150,105,40,.3);
+}
+/* sugar sprinkles on the glaze */
+#cakeScene .lc-tier .lc-top::after{
+  content:"";position:absolute;inset:0;border-radius:50%;
+  background:
+    radial-gradient(circle at 26% 42%,#e2606f 0 2.2px,transparent 3px),
+    radial-gradient(circle at 44% 30%,#4fa4c2 0 2.2px,transparent 3px),
+    radial-gradient(circle at 62% 46%,#f2d24b 0 2.2px,transparent 3px),
+    radial-gradient(circle at 74% 36%,#e2606f 0 2.2px,transparent 3px),
+    radial-gradient(circle at 55% 60%,#7bc47f 0 2.2px,transparent 3px),
+    radial-gradient(circle at 35% 58%,#f2d24b 0 2.2px,transparent 3px);
+  opacity:.9;
+}
+
+#cakeScene .lc-tier-1{width:360px;height:130px;bottom:40px;}
+#cakeScene .lc-tier-1 .lc-top{top:-33px;height:66px;}
+#cakeScene .lc-tier-2{width:250px;height:100px;bottom:172px;}
+#cakeScene .lc-tier-2 .lc-top{top:-28px;height:56px;}
+
+/* ---- golden drip glaze ---- */
+#cakeScene .lc-drips{
+  position:absolute;left:0;top:0;width:100%;height:70px;z-index:3;
+  display:flex;justify-content:space-between;align-items:flex-start;
+  pointer-events:none;
+}
+#cakeScene .lc-drips i{
+  display:block;width:22px;border-radius:0 0 13px 13px;
+  background:linear-gradient(180deg,#ecc57c,#d3a558 68%,#b8863c);
+  box-shadow:0 2px 3px rgba(90,60,20,.2);
+}
+/* organic, uneven drip lengths */
+#cakeScene .lc-tier-1 .lc-drips i:nth-child(1){height:30px}
+#cakeScene .lc-tier-1 .lc-drips i:nth-child(2){height:48px}
+#cakeScene .lc-tier-1 .lc-drips i:nth-child(3){height:26px}
+#cakeScene .lc-tier-1 .lc-drips i:nth-child(4){height:42px}
+#cakeScene .lc-tier-1 .lc-drips i:nth-child(5){height:24px}
+#cakeScene .lc-tier-1 .lc-drips i:nth-child(6){height:52px}
+#cakeScene .lc-tier-1 .lc-drips i:nth-child(7){height:28px}
+#cakeScene .lc-tier-1 .lc-drips i:nth-child(8){height:44px}
+#cakeScene .lc-tier-1 .lc-drips i:nth-child(9){height:25px}
+#cakeScene .lc-tier-1 .lc-drips i:nth-child(10){height:40px}
+#cakeScene .lc-tier-1 .lc-drips i:nth-child(11){height:29px}
+#cakeScene .lc-tier-1 .lc-drips i:nth-child(12){height:46px}
+
+#cakeScene .lc-tier-2 .lc-drips i{width:20px}
+#cakeScene .lc-tier-2 .lc-drips i:nth-child(1){height:26px}
+#cakeScene .lc-tier-2 .lc-drips i:nth-child(2){height:40px}
+#cakeScene .lc-tier-2 .lc-drips i:nth-child(3){height:22px}
+#cakeScene .lc-tier-2 .lc-drips i:nth-child(4){height:46px}
+#cakeScene .lc-tier-2 .lc-drips i:nth-child(5){height:24px}
+#cakeScene .lc-tier-2 .lc-drips i:nth-child(6){height:38px}
+#cakeScene .lc-tier-2 .lc-drips i:nth-child(7){height:21px}
+#cakeScene .lc-tier-2 .lc-drips i:nth-child(8){height:42px}
+
+/* ---- name piped on the front ---- */
+#cakeScene .lc-name{
+  position:absolute;left:50%;bottom:74px;transform:translateX(-50%);
+  z-index:5;white-space:nowrap;
+  font-family:"Cormorant Garamond",Georgia,serif;
+  font-style:italic;font-weight:600;
+  font-size:46px;letter-spacing:.05em;
+  color:#8a5f28;
+  text-shadow:0 1px 0 rgba(255,255,255,.55),0 2px 5px rgba(120,90,40,.28);
+}
+
+/* ---- candles ---- */
+#cakeScene .lc-candles{
+  position:absolute;left:50%;bottom:262px;transform:translateX(-50%);
+  display:flex;gap:56px;align-items:flex-end;z-index:6;
+}
+#cakeScene .lc-candle{
+  position:relative;width:16px;height:78px;border-radius:5px 5px 3px 3px;
+  background:repeating-linear-gradient(160deg,#fff7e6 0 9px,#d9b26a 9px 18px);
+  box-shadow:inset 2px 0 3px rgba(255,255,255,.85),inset -3px 0 4px rgba(120,85,30,.28),0 4px 6px rgba(0,0,0,.3);
+}
+#cakeScene .lc-candle:nth-child(2){height:92px}
+#cakeScene .lc-wick{
+  position:absolute;left:50%;top:-7px;transform:translateX(-50%);
+  width:2px;height:9px;background:#4a3a28;border-radius:1px;
+}
+#cakeScene .lc-flame{
+  position:absolute;left:50%;top:-32px;transform:translateX(-50%);
+  width:16px;height:27px;
+  border-radius:50% 50% 50% 50%/62% 62% 40% 40%;
+  background:radial-gradient(ellipse at 50% 72%,#fffbe0 0 20%,#ffd45e 45%,#f59a1e 72%,rgba(245,154,30,0) 79%);
+  filter:drop-shadow(0 0 11px rgba(255,180,60,.9));
+  transform-origin:50% 90%;
+  animation:lcFlame .5s ease-in-out infinite alternate;
+}
+@keyframes lcFlame{from{transform:translateX(-50%) rotate(-3deg) scale(.96,1)}to{transform:translateX(-50%) rotate(3deg) scale(1,1.07)}}
+#cakeScene .lc-smoke{
+  position:absolute;left:50%;margin-left:-4px;top:-36px;
+  width:8px;height:46px;border-radius:50%;
+  background:linear-gradient(transparent,rgba(230,225,215,.6),transparent);
+  filter:blur(2px);opacity:0;pointer-events:none;
+}
+
+/* ---- blow-out (class added by JS on #cake) — smooth, one by one ---- */
+#cakeScene #cake.extinguished .lc-flame{
+  animation:lcBlowOut 1.2s cubic-bezier(.45,.05,.25,1) forwards!important;
+}
+#cakeScene #cake.extinguished .lc-candle:nth-child(1) .lc-flame{animation-delay:0s!important}
+#cakeScene #cake.extinguished .lc-candle:nth-child(2) .lc-flame{animation-delay:.32s!important}
+#cakeScene #cake.extinguished .lc-candle:nth-child(3) .lc-flame{animation-delay:.64s!important}
+@keyframes lcBlowOut{
+  0%{opacity:1;transform:translateX(-50%) rotate(0deg) scale(1);filter:drop-shadow(0 0 11px rgba(255,180,60,.9))}
+  30%{opacity:.95;transform:translateX(calc(-50% + 3px)) rotate(6deg) scale(.94,.98);filter:drop-shadow(0 0 10px rgba(255,180,60,.8))}
+  60%{opacity:.55;transform:translateX(calc(-50% + 8px)) rotate(13deg) scale(.62,.7);filter:blur(1px) drop-shadow(0 0 6px rgba(255,180,60,.5))}
+  100%{opacity:0;transform:translateX(calc(-50% + 13px)) translateY(9px) rotate(22deg) scale(.06);filter:blur(3px) drop-shadow(0 0 0 rgba(255,180,60,0))}
+}
+#cakeScene #cake.extinguished .lc-smoke{animation:lcSmoke 2.6s cubic-bezier(.3,0,.3,1) forwards}
+#cakeScene #cake.extinguished .lc-candle:nth-child(1) .lc-smoke{animation-delay:.1s}
+#cakeScene #cake.extinguished .lc-candle:nth-child(2) .lc-smoke{animation-delay:.42s}
+#cakeScene #cake.extinguished .lc-candle:nth-child(3) .lc-smoke{animation-delay:.74s}
+@keyframes lcSmoke{0%{opacity:0;transform:translateY(0) scale(.4)}22%{opacity:.5}100%{opacity:0;transform:translate(14px,-80px) scale(2.1)}}
+
+/* ---- responsive scaling ---- */
+@media(max-width:720px){
+  #cakeScene .cake-stage{height:clamp(330px,48vh,430px)}
+  #cakeScene #cake.lc-cake{transform:scale(.72);transform-origin:center bottom}
+}
+@media(max-height:700px) and (min-width:721px){
+  #cakeScene .cake-stage{height:clamp(320px,50vh,420px)}
+  #cakeScene #cake.lc-cake{transform:scale(.8);transform-origin:center bottom}
+}
+/* =========================================================
+   ROUND 4 — NEW EFFECTS
+   Cursor sparkles · aurora glow · balloons · heart fireworks
+   gift box · wish constellation
+   ========================================================= */
+
+/* ---- animated aurora glow on every scene background ---- */
+.bg:after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(40% 30% at 24% 28%,rgba(214,187,124,.10),transparent 62%),
+    radial-gradient(34% 26% at 78% 26%,rgba(120,160,220,.07),transparent 62%),
+    radial-gradient(44% 34% at 52% 82%,rgba(214,140,124,.06),transparent 62%);
+  animation:auroraShift 17s ease-in-out infinite alternate}
+@keyframes auroraShift{0%{transform:translate3d(-2%,-1.5%,0) scale(1.02)}100%{transform:translate3d(2%,1.5%,0) scale(1.1)}}
+
+/* ---- cursor sparkle trail ---- */
+.sparkle{position:fixed;z-index:86;pointer-events:none;font-size:12px;line-height:1;color:var(--gold2);text-shadow:0 0 8px rgba(241,219,168,.9);animation:sparkleFade .9s ease-out forwards}
+@keyframes sparkleFade{0%{opacity:0;transform:translate(-50%,-50%) scale(.3) rotate(0)}22%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(1.15) translateY(-20px) rotate(130deg)}}
+
+/* ---- rising balloons ---- */
+.balloon{position:fixed;bottom:-170px;z-index:58;border-radius:50% 50% 48% 48%;pointer-events:none;opacity:0;animation:balloonRise var(--bd) linear forwards}
+.balloon:before{content:"";position:absolute;left:50%;bottom:-7px;transform:translateX(-50%);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:8px solid var(--bc)}
+.balloon:after{content:"";position:absolute;left:50%;bottom:-72px;width:1px;height:72px;background:linear-gradient(rgba(255,255,255,.32),transparent);transform:translateX(-50%)}
+@keyframes balloonRise{0%{transform:translateY(0) translateX(0) rotate(-5deg);opacity:0}12%{opacity:.92}100%{transform:translateY(-120vh) translateX(var(--bx)) rotate(7deg);opacity:.85}}
+
+/* ---- gift box scene ---- */
+#giftScene .bg{background:radial-gradient(ellipse at 50% 40%,rgba(214,187,124,.14),transparent 50%),linear-gradient(180deg,#0a0908,#050403)}
+.gift-wrap{position:relative;width:230px;height:212px;cursor:pointer;margin:10px auto 0;transition:transform .5s var(--ease)}
+.gift-wrap:hover{transform:translateY(-6px) scale(1.03)}
+.gift-box{position:absolute;left:0;bottom:0;width:230px;height:150px;border-radius:10px;background:linear-gradient(160deg,#c9a25e,#a67f3c);box-shadow:inset 0 6px 14px rgba(255,255,255,.28),0 24px 50px rgba(0,0,0,.6)}
+.gift-lid{position:absolute;left:-12px;top:36px;width:254px;height:52px;border-radius:10px;background:linear-gradient(160deg,#e0bb74,#b98f45);box-shadow:0 10px 22px rgba(0,0,0,.5);transition:transform .9s cubic-bezier(.3,1.4,.5,1),opacity .9s}
+.gift-ribbon-v{position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:26px;height:150px;background:linear-gradient(180deg,#f4e2b4,#d6bb7c)}
+.gift-ribbon-h{position:absolute;left:0;top:64px;width:230px;height:22px;background:linear-gradient(90deg,#f4e2b4,#d6bb7c)}
+.gift-bow{position:absolute;left:50%;top:12px;transform:translateX(-50%);font-size:42px;line-height:1;filter:drop-shadow(0 4px 8px rgba(0,0,0,.5));transition:.6s var(--ease)}
+.gift-wrap.open .gift-lid{transform:translateY(-130px) rotate(-18deg);opacity:0}
+.gift-wrap.open .gift-bow{transform:translateX(-50%) translateY(-120px) rotate(24deg);opacity:0}
+.gift-wrap.open{transform:translateY(6px)}
+.gift-msg{margin-top:32px;max-width:640px;font-family:"Cormorant Garamond",Georgia,serif;font-size:clamp(19px,2.8vw,26px);line-height:1.66;color:#e3dacb;min-height:1.66em}
+.gift-msg .cursor{display:inline-block;width:2px;height:1em;background:var(--gold);margin-left:3px;vertical-align:-2px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.gift-hint{margin-top:16px;font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:var(--muted)}
+.gift-next{margin-top:28px;opacity:0;pointer-events:none;transition:opacity .8s var(--ease)}
+.gift-next.show{opacity:1;pointer-events:auto}
+
+/* ---- wish constellation scene ---- */
+#wishScene .bg{background:radial-gradient(ellipse at 50% 28%,rgba(120,140,200,.10),transparent 56%),linear-gradient(180deg,#060608,#040304)}
+.wish-sky{position:absolute;inset:0;overflow:hidden}
+.wish-star{position:absolute;width:22px;height:22px;cursor:pointer;transform:translate(-50%,-50%);transition:.4s var(--ease);z-index:2}
+.wish-star:before{content:"\2726";font-size:17px;color:#fff6dd;display:block;line-height:22px;text-align:center;text-shadow:0 0 10px rgba(255,240,200,.9);animation:pulse 3s ease-in-out infinite}
+.wish-star:hover{transform:translate(-50%,-50%) scale(1.45)}
+.wish-star.found:before{color:var(--gold2);animation:none;text-shadow:0 0 18px rgba(241,219,168,1)}
+.wish-star.found{transform:translate(-50%,-50%) scale(1.1)}
+.wish-card{position:fixed;inset:0;z-index:88;display:none;place-items:center;padding:26px;background:rgba(0,0,0,.74);backdrop-filter:blur(15px)}
+.wish-card.show{display:grid;animation:fromBrotherIn .5s var(--ease) both}
+.wish-inner{width:min(560px,92vw);text-align:center;border:1px solid var(--line);background:linear-gradient(160deg,rgba(20,18,15,.96),rgba(8,7,6,.96));padding:clamp(28px,5vw,48px);box-shadow:0 40px 120px rgba(0,0,0,.7)}
+.wish-inner .w-num{font-size:8px;letter-spacing:.4em;text-transform:uppercase;color:var(--gold)}
+.wish-inner h3{font-family:"Cormorant Garamond",Georgia,serif;font-weight:400;font-size:clamp(26px,4.4vw,40px);margin:12px 0 12px}
+.wish-inner p{font-family:"Cormorant Garamond",Georgia,serif;font-size:clamp(18px,2.5vw,23px);line-height:1.6;color:#cfc6b7}
+.wish-progress{margin-top:20px;font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:var(--muted)}
+#wishDone{margin-top:26px;opacity:0;pointer-events:none;transition:.8s var(--ease)}
+#wishDone.show{opacity:1;pointer-events:auto}
+
+/* small "gift" button under the final screen */
+#giftBtn{margin-top:14px}
+
+/* =========================================================
+   END OF CSS — website scenes and JavaScript are below
+   ========================================================= */
+</style>
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+</head>
+<body>
+<div class="noise"></div><div class="vignette"></div>
+<canvas id="fxCanvas"></canvas><div class="confetti" id="confetti"></div>
+
+<!-- =====================================================
+     01 — LOADING / INTRO SCREEN
+     ===================================================== -->
+<section id="boot" class="scene active"><div class="bg"></div><div class="center"><div class="content"><div class="boot-mark">N / PRIVATE EXPERIENCE</div><div class="boot-bar"><i></i></div><div class="boot-status" id="bootStatus">Initialisation</div></div></div></section>
+
+<!-- =====================================================
+     02 — PRIVATE ACCESS / BIRTHDAY CODE SCREEN
+     ===================================================== -->
+<section id="access" class="scene"><div class="bg"></div><div class="particles"></div><div class="center"><div class="content">
+<div class="eyebrow">Invitation privée</div><h1 class="access-title">LAMIA</h1><div class="goldline" style="margin-top:25px"></div>
+<p class="access-sub">Une petite porte vers quelque chose préparé spécialement pour toi.<br>Tu connais déjà la clé.</p>
+<div class="keypad"><div class="code-display" id="codeDisplay"></div><div class="keys" id="keys"></div></div>
+<div class="access-error" id="accessError"></div><div class="small">Entrée sécurisée · 8 chiffres</div>
+</div></div></section>
+
+<!-- =====================================================
+     03 — ACCESS VERIFIED SCREEN
+     ===================================================== -->
+<section id="verified" class="scene"><div class="bg"></div><div class="center"><div class="content"><div class="verify-ring"><div class="check">✓</div></div><div class="verify-text"><h2>Identité confirmée.</h2><p>Bienvenue, Lamia.</p></div></div></div></section>
+
+<!-- =====================================================
+     04 — CINEMATIC WELCOME
+     ===================================================== -->
+<section id="reveal" class="scene"><div class="bg"></div><div class="reveal-orb"></div><div class="center"><div class="content"><div class="eyebrow">Une soirée rien qu'à toi</div><h1 class="reveal-logo">LAMIA</h1><div class="goldline" style="margin-top:32px"></div><div class="reveal-sub">Aujourd'hui, tout est pour toi.</div></div></div></section>
+
+<!-- =====================================================
+     05 — SHORT CINEMATIC TRANSITION
+     ===================================================== -->
+<section id="interlude" class="scene"><div class="bg"></div><div class="center"><div class="content"><div class="interlude-word serif">Prends ton temps.</div><div class="interlude-line"></div></div></div></section>
+
+<!-- =====================================================
+     06 — CAKE SCENE
+     CUSTOM CAKE HTML GOES INSIDE THE #cake ELEMENT BELOW.
+     Keep id="cake" because the candle animation uses it.
+     Cake CSS is in section "05 — CAKE DESIGN" inside <style>.
+     ===================================================== -->
+<section id="cakeScene" class="scene"><div class="bg"></div><div class="particles"></div><div class="center"><div class="content">
+<div class="eyebrow">Le gâteau est à toi</div>
+<div class="cake-stage">
+  <div class="table-glow"></div>
+  <!-- CLEAN PROFESSIONAL CAKE — keeps the original dark site background -->
+  <div id="cake" class="lc-cake">
+    <div class="lc-plate"></div>
+    <div class="lc-tier lc-tier-1">
+      <div class="lc-side"></div>
+      <div class="lc-top"></div>
+      <div class="lc-drips"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    </div>
+    <div class="lc-tier lc-tier-2">
+      <div class="lc-side"></div>
+      <div class="lc-top"></div>
+      <div class="lc-drips"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    </div>
+    <div class="lc-candles">
+      <div class="lc-candle"><span class="lc-wick"></span><span class="lc-flame"></span><span class="lc-smoke"></span></div>
+      <div class="lc-candle"><span class="lc-wick"></span><span class="lc-flame"></span><span class="lc-smoke"></span></div>
+      <div class="lc-candle"><span class="lc-wick"></span><span class="lc-flame"></span><span class="lc-smoke"></span></div>
+    </div>
+    <div class="lc-name">Lamia</div>
+  </div>
+</div>
+<div class="wish-copy"><h2>Fais un vœu.</h2><p>Ferme les yeux… pense à ton vœu… puis souffle doucement sur les bougies.</p>
+<button class="btn blow-button" id="blowBtn"><span class="blow-icon">✦</span> Souffler les bougies</button>
+<div class="mic-note" id="micNote">Le bouton suffit · souffle réel disponible si ton navigateur l'autorise</div></div>
+</div></div></section>
+
+<!-- =====================================================
+     07 — FAMILY AUDIO SCREEN
+     Audio filenames and volumes are in CONFIG / AUDIO section.
+     ===================================================== -->
+<section id="audioScene" class="scene"><div class="bg"></div><div class="center"><div class="content">
+<div class="eyebrow">Un message de ta maman</div><h1 class="audio-scene-title">Écoute.</h1><div class="soundwave" id="soundwave"></div>
+<button class="btn start-audio-premium" id="startAudioBtn"><span class="blow-icon">▶</span> Écouter le message</button>
+<div class="audio-caption" id="audioCaption">La musique continue doucement. Appuie quand tu es prête.</div></div></div></section>
+
+<!-- =====================================================
+     08 — JOYEUX ANNIVERSAIRE CELEBRATION
+     ===================================================== -->
+<section id="celebration" class="scene"><div class="bg"></div><div class="center"><div class="content">
+<div class="eyebrow">Pour toi</div><h1 class="audio-scene-title">JOYEUX<br>ANNIVERSAIRE</h1><div class="goldline" style="margin-top:32px"></div><div class="reveal-sub">Lamia</div>
+</div></div></section>
+
+<!-- =====================================================
+     08b — FROM YOUR BROTHER (shown after the family audio)
+     ===================================================== -->
+<section id="fromBrother" class="scene"><div class="bg"></div><div class="particles"></div><div class="fb-glow"></div><div class="center"><div class="content">
+<div class="eyebrow">Un dernier mot</div>
+<div class="fb-line">Avant que tu lises ma lettre, je voulais te dire une chose simple : je suis fier de toi.</div>
+<div class="fb-sign">Nizar</div>
+<div class="fb-from">De la part de ton frère</div>
+<button class="btn fb-next" id="fbNext">Lire ta lettre</button>
+</div></div></section>
+
+<!-- =====================================================
+     09 — PERSONAL LETTER
+     Edit the French letter in CONFIG below in the JavaScript.
+     ===================================================== -->
+<section id="letterScene" class="scene"><div class="bg"></div><div class="center"><div class="content">
+<div class="letter-wrap"><div class="letter letter-reveal"><div class="letter-top"><span>Une lettre, rien que pour toi</span><h2>Lamia</h2></div><div class="letter-body" id="letterBody"></div></div></div>
+<button class="btn" id="photoBtn" style="margin-top:17px">Une dernière chose</button>
+</div></div></section>
+
+<!-- =====================================================
+     10 — FAMILY PHOTO
+     Put your photo next to index.html and set CONFIG.familyPhoto below.
+     ===================================================== -->
+<section id="photoScene" class="scene"><div class="bg"></div><div class="center"><div class="content">
+<div class="eyebrow">Un souvenir de nous</div><div class="family-frame"><img id="familyPhoto" alt="Lamia avec ses frères"></div>
+<button class="btn love-button" id="loveBtn"><strong>On t'aime tous 🤍</strong></button>
+</div></div></section>
+
+<!-- =====================================================
+     11 — FINAL SCREEN
+     ===================================================== -->
+<section id="final" class="scene"><div class="bg"></div><div class="particles"></div>
+<div class="shooting-star" style="--sx:88%;--sy:14%;--sd:5.5s;--sdel:0s"></div>
+<div class="shooting-star" style="--sx:72%;--sy:8%;--sd:6.5s;--sdel:2.4s"></div>
+<div class="shooting-star" style="--sx:95%;--sy:26%;--sd:7s;--sdel:4.2s"></div>
+<div class="center"><div class="content">
+<div class="eyebrow">Pour toujours</div><h1 class="final-name">LAMIA</h1><div class="goldline" style="margin-top:30px"></div>
+<div class="final-quote">« Que chaque jour t'apporte une nouvelle raison de sourire. »</div><div class="final-by">De Nizar · ton frère</div>
+<button class="btn" id="replay" style="margin-top:30px">Revivre l'expérience</button>
+<button class="btn" id="giftBtn">Ouvre ton cadeau 🎁</button>
+</div></div>
+<div id="secretStar" title="Une petite surprise…"></div>
+</section>
+
+<!-- special surprise card -->
+<div class="secret-card" id="secretCard"><div class="secret-inner">
+<div class="s-eyebrow">Une petite surprise</div>
+<h3>Un souhait, rien que pour toi</h3>
+<p>Que cette année t'apporte tout ce que ton cœur désire — le bonheur, la santé, la réussite, et des milliers de raisons de sourire. Tu le mérites, Lamia.</p>
+<div class="s-sign">— avec tout mon amour, ton frère</div>
+<button class="btn secret-close" id="secretClose">Merci 🤍</button>
+</div></div>
+
+  <!-- =====================================================
+       12 — GIFT BOX (a surprise for Lamia)
+       ===================================================== -->
+  <section id="giftScene" class="scene"><div class="bg"></div><div class="particles"></div><div class="center"><div class="content">
+  <div class="eyebrow">Un cadeau pour toi</div>
+  <div class="gift-wrap" id="giftWrap" title="Appuie pour ouvrir">
+    <div class="gift-bow">🎀</div>
+    <div class="gift-lid"></div>
+    <div class="gift-box"><div class="gift-ribbon-v"></div><div class="gift-ribbon-h"></div></div>
+  </div>
+  <div class="gift-msg" id="giftMsg"></div>
+  <div class="gift-hint" id="giftHint">Appuie sur le cadeau pour l'ouvrir</div>
+  <button class="btn gift-next" id="giftNext">La constellation de tes vœux</button>
+  </div></div></section>
+
+  <!-- =====================================================
+       13 — WISH CONSTELLATION (interactive stars)
+       ===================================================== -->
+  <section id="wishScene" class="scene"><div class="bg"></div><div class="wish-sky" id="wishSky"></div><div class="center"><div class="content">
+  <div class="eyebrow">Fais un vœu</div>
+  <h1 class="audio-scene-title" style="font-size:clamp(38px,7vw,74px)">Tes étoiles</h1>
+  <div class="audio-caption" id="wishCaption">Touche chaque étoile… il y a un mot pour toi derrière chacune.</div>
+  <button class="btn" id="wishDone">Terminer</button>
+  </div></div>
+  <div class="wish-card" id="wishCard"><div class="wish-inner">
+  <div class="w-num" id="wishNum">Étoile 1</div>
+  <h3 id="wishTitle"></h3>
+  <p id="wishText"></p>
+  <div class="wish-progress" id="wishProgress"></div>
+  <button class="btn secret-close" id="wishClose">Fermer</button>
+  </div></div>
+  </section>
+
+
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script><audio id="bgMusic" loop preload="auto"></audio><audio id="birthdayAudio" preload="auto"></audio>
+<button class="music-control paused" id="musicControl" aria-label="Musique"><div class="music-bars"><i></i><i></i><i></i></div></button>
+<div class="volume-panel" id="volumePanel"><span>VOLUME</span><input id="volumeSlider" type="range" min="0" max="1" step=".01" value=".10"></div>
+<div class="audio-status"><i class="audio-dot"></i><span id="audioText">Expérience privée</span></div>
+<script>
+/* =========================================================
+   JAVASCRIPT GUIDE
+   01 — CONFIG: edit the birthday code, names, audio/photo
+        filenames and letter here.
+   02 — ACCESS / scene navigation
+   03 — BACKGROUND MUSIC + VOLUME CONTROL
+   04 — CAKE BLOW-OUT + SMOKE + CELEBRATION
+   05 — FAMILY AUDIO playback and return to background music
+   06 — LETTER, FAMILY PHOTO, FINAL SCREEN, REPLAY
+   ========================================================= */
+
+/* =========================================================
+   01 — CONFIGURATION: PERSONALIZE THE WEBSITE HERE
+   ========================================================= */
+const CONFIG={
+ birthdayCode:"19871013",
+ backgroundMusic:"video.mp3",
+ birthdayAudio:"audio.mp3",
+ familyPhoto:"familly.jpg",
+ playTune:true,
+ soundEffects:true,
+ letter:`Ma sœur Lamia,
+
+Je voulais prendre un petit moment aujourd’hui pour t’écrire quelques mots, parce que tu mérites bien plus qu’un simple « joyeux anniversaire ».
+
+Tu sais, même si je ne le dis pas toujours, je suis vraiment heureux de t’avoir comme sœur. Je suis fier de la personne que tu es, et j’espère sincèrement que la vie t’apportera tout ce que tu mérites de beau.
+
+Pour cette nouvelle année de ta vie, je te souhaite beaucoup de bonheur, de réussite, de santé et de tranquillité. J’espère que tu réaliseras tes rêves, que tu trouveras toujours des raisons de sourire, même dans les moments difficiles, et que tu seras entourée de personnes qui t’aiment vraiment et qui veulent te voir heureuse.
+
+Peu importe où la vie nous mènera, tu resteras toujours ma sœur, et ça, rien ne pourra le changer. On ne se dit peut-être pas toujours les choses, mais je veux que tu saches que tu comptes énormément pour moi et que je serai toujours heureux de te voir avancer, réussir et être heureuse.
+
+Merci d’être la sœur que tu es, merci pour tous les souvenirs qu’on partage et pour la place que tu as dans ma vie. Je ne suis peut-être pas toujours le meilleur pour exprimer ce que je ressens, mais je veux que tu saches une chose : je t’aime et je serai toujours fier de t’appeler ma sœur.
+
+Profite pleinement de ta journée, souris autant que possible et n’oublie jamais que tu mérites le meilleur de cette vie.
+
+**Joyeux anniversaire, ma sœur ❤️**
+
+Que cette nouvelle année t’apporte encore plus de bonheur, de réussite et de belles surprises.
+
+**Je t’aime fort, grande sœur.**
+
+— Nizar`
+};
+const $=s=>document.querySelector(s), scenes=[...document.querySelectorAll('.scene')];
+let current='boot',code='',blowStarted=false,musicStarted=false;
+const bgMusic=$('#bgMusic'), birthdayAudio=$('#birthdayAudio');
+bgMusic.src=CONFIG.backgroundMusic; birthdayAudio.src=CONFIG.birthdayAudio; birthdayAudio.volume=.42;
+const familyImg=$('#familyPhoto');
+familyImg.onerror=()=>{if(!familyImg.dataset.alt&&CONFIG.familyPhoto!=='family.jpg'){familyImg.dataset.alt='1';familyImg.src='family.jpg';return}familyImg.style.display='none';const box=document.createElement('div');box.className='photo-fallback';box.textContent='Ajoute ta photo (familly.jpg) à côté du fichier index.html';const fr=document.querySelector('.family-frame');if(fr&&!fr.querySelector('.photo-fallback'))fr.appendChild(box)};
+familyImg.src=CONFIG.familyPhoto;
+function show(id,delay=0){setTimeout(()=>{scenes.forEach(s=>s.classList.toggle('active',s.id===id));current=id},delay)}
+function wait(ms){return new Promise(r=>setTimeout(r,ms))}
+
+document.querySelectorAll('.particles').forEach(root=>{for(let i=0;i<45;i++){const p=document.createElement('i');p.style.setProperty('--x',Math.random()*100+'%');p.style.setProperty('--y',Math.random()*100+'%');p.style.setProperty('--t',2+Math.random()*5+'s');p.style.animationDelay=-Math.random()*5+'s';root.appendChild(p)}});
+
+const bootStatus=$('#bootStatus');
+setTimeout(()=>bootStatus.textContent='Préparation de l’invitation',650);
+setTimeout(()=>bootStatus.textContent='Ouverture du protocole privé',1350);
+setTimeout(()=>show('access'),2350);
+
+const display=$('#codeDisplay'),keys=$('#keys'),error=$('#accessError');
+for(let i=0;i<8;i++){const d=document.createElement('i');d.className='dot';display.appendChild(d)}
+['1','2','3','4','5','6','7','8','9','⌫','0','↵'].forEach(n=>{const b=document.createElement('button');b.className='key';b.innerHTML=n;const letters={2:'ABC',3:'DEF',4:'GHI',5:'JKL',6:'MNO',7:'PQRS',8:'TUV',9:'WXYZ'};if(letters[n])b.innerHTML=n+'<span>'+letters[n]+'</span>';b.onclick=()=>press(n);keys.appendChild(b)});
+function render(){[...display.children].forEach((d,i)=>d.classList.toggle('on',i<code.length))}
+function press(n){if(n==='⌫'){code=code.slice(0,-1);render();return}if(n==='↵'){verify();return}if(code.length>=8)return;code+=n;render();if(code.length===8)setTimeout(verify,220)}
+function verify(){if(code===CONFIG.birthdayCode){error.textContent='';show('verified');setTimeout(()=>show('reveal'),2300);setTimeout(()=>show('interlude'),5200);setTimeout(()=>show('cakeScene'),7600);startCalmMusic()}else{error.textContent='Code incorrect — essaie encore.';code='';render();$('.keypad').animate([{transform:'translateX(-6px)'},{transform:'translateX(6px)'},{transform:'translateX(-4px)'},{transform:'translateX(0)'}],{duration:320})}}
+document.addEventListener('keydown',e=>{if(current!=='access')return;if(/[0-9]/.test(e.key))press(e.key);if(e.key==='Backspace')press('⌫');if(e.key==='Enter')press('↵')});
+
+/* CALM MUSIC + VOLUME */
+const musicControl=$('#musicControl'),volumePanel=$('#volumePanel'),volumeSlider=$('#volumeSlider');
+bgMusic.volume=.10;
+/* =========================================================
+   03 — BACKGROUND MUSIC / VOLUME SLIDER
+   Initial volume and slider behavior are handled here.
+   ========================================================= */
+function startCalmMusic(){if(musicStarted)return;userMusicVolume=parseFloat(volumeSlider.value);bgMusic.volume=userMusicVolume;bgMusic.play().then(()=>{musicStarted=true;musicControl.classList.remove('paused');$('#audioText').textContent='Musique douce'}).catch(()=>{$('#audioText').textContent='Musique prête'})}
+musicControl.onclick=()=>{volumePanel.classList.toggle('show');};
+volumeSlider.oninput=()=>{userMusicVolume=parseFloat(volumeSlider.value);bgMusic.volume=userMusicVolume};
+document.addEventListener('pointerdown',e=>{if(!e.target.closest('#musicControl,.volume-panel'))volumePanel.classList.remove('show')});
+
+for(let i=0;i<38;i++){const x=document.createElement('i');x.style.height=(8+Math.random()*30)+'px';x.style.animationDelay=(Math.random()*.7)+'s';$('#soundwave').appendChild(x)}
+
+/* CANDLES */
+$('#blowBtn').onclick=blowCandles;
+/* =========================================================
+   04 — CAKE BLOW-OUT SEQUENCE
+   This handles the button, candle animation, and transition
+   to the birthday celebration, then the family audio screen.
+   ========================================================= */
+async function blowCandles(){if(blowStarted)return;blowStarted=true;const btn=$('#blowBtn');btn.classList.add('blowing');btn.disabled=true;btn.innerHTML='<span class="blow-icon">✦</span> Les bougies s’éteignent…';$('#micNote').textContent='Ton vœu est fait.';await wait(250);$('#cake').classList.add('extinguished');await wait(1850);launchConfetti(150);fireworks(6);launchBalloons(16);playBirthdayTune();show('celebration');await wait(3100);show('audioScene');$('#audioCaption').textContent='La musique continue doucement. Appuie quand tu es prête.';btn.disabled=false}
+
+/* Optional real breath detection. The button is always the reliable fallback. */
+async function tryMicrophone(){try{if(!navigator.mediaDevices?.getUserMedia)return;const stream=await navigator.mediaDevices.getUserMedia({audio:true});const ctx=new (window.AudioContext||window.webkitAudioContext)();const source=ctx.createMediaStreamSource(stream),analyser=ctx.createAnalyser();analyser.fftSize=512;source.connect(analyser);const data=new Uint8Array(analyser.fftSize);const started=Date.now();const listen=()=>{analyser.getByteTimeDomainData(data);let sum=0;for(const v of data){const x=(v-128)/128;sum+=x*x}const rms=Math.sqrt(sum/data.length);if(rms>.11&&Date.now()-started>900){stream.getTracks().forEach(t=>t.stop());ctx.close();blowCandles();return}if(Date.now()-started<10000)requestAnimationFrame(listen);else{stream.getTracks().forEach(t=>t.stop());ctx.close()}};listen()}catch{}}
+// Microphone is never requested automatically; the button is the reliable interaction.
+
+let userMusicVolume=.10;
+function smoothVolume(audio,target,duration){const from=audio.volume,start=performance.now();function step(now){const p=Math.min(1,(now-start)/duration),e=1-Math.pow(1-p,3);audio.volume=from+(target-from)*e;if(p<1)requestAnimationFrame(step)}requestAnimationFrame(step)}
+/* =========================================================
+   05 — FAMILY RECORDING
+   The calm background track is lowered while the recording
+   plays and restored when the recording ends.
+   ========================================================= */
+async function playBirthdayAudio(){if(!birthdayAudio.paused)return;$('#audioText').textContent='Message de la famille';$('#startAudioBtn').disabled=true;$('#startAudioBtn').innerHTML='<span class="blow-icon">●</span> Lecture en cours';$('#audioCaption').textContent='Un message de votre famille…';smoothVolume(bgMusic,Math.min(userMusicVolume,.035),900);try{await birthdayAudio.play()}catch{$('#audioCaption').textContent='La lecture a été bloquée. Appuie à nouveau.';$('#startAudioBtn').disabled=false;$('#startAudioBtn').innerHTML='<span class="blow-icon">▶</span> Écouter le message';smoothVolume(bgMusic,userMusicVolume,500)}}
+$('#startAudioBtn').onclick=playBirthdayAudio;
+birthdayAudio.addEventListener('ended',async()=>{smoothVolume(bgMusic,userMusicVolume,1500);$('#audioText').textContent='Musique douce';$('#audioCaption').textContent='Merci pour ce petit moment.';await wait(1200);fireworks(5);await wait(2400);show('fromBrother')});
+/* ---- from-brother signature screen -> letter ---- */
+$('#fbNext').onclick=()=>{$('#letterBody').textContent=CONFIG.letter;show('letterScene')};
+/* ---- fireworks (canvas) ---- */
+const fxCanvas=$('#fxCanvas');let fxRaf=null,fxParts=[];
+function sizeFx(){if(!fxCanvas)return;fxCanvas.width=innerWidth;fxCanvas.height=innerHeight}
+addEventListener('resize',sizeFx);sizeFx();
+function fireworks(bursts=5){if(!fxCanvas)return;sizeFx();const colors=['#f1dba8','#d6bb7c','#fff6dd','#e8c07a','#ffffff'];let count=0;const spawn=()=>{const x=innerWidth*(.2+Math.random()*.6),y=innerHeight*(.15+Math.random()*.42);for(let i=0;i<72;i++){const a=Math.PI*2*i/72+Math.random()*.12,sp=2+Math.random()*4.2;fxParts.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:1,color:colors[Math.floor(Math.random()*colors.length)]})}count++;if(count<bursts)setTimeout(spawn,300+Math.random()*320)};spawn();if(!fxRaf)fxLoop()}
+function fxLoop(){const ctx=fxCanvas.getContext('2d');ctx.clearRect(0,0,fxCanvas.width,fxCanvas.height);fxParts=fxParts.filter(p=>p.life>0);fxParts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.045;p.vx*=.985;p.vy*=.985;p.life-=.012;ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.size||2.2,0,7);ctx.fill()});ctx.globalAlpha=1;if(fxParts.length){fxRaf=requestAnimationFrame(fxLoop)}else{fxRaf=null;ctx.clearRect(0,0,fxCanvas.width,fxCanvas.height)}}
+/* ---- the special surprise (final screen) ---- */
+$('#secretStar').onclick=()=>{$('#secretCard').classList.add('show');heartBurst(16)};
+$('#secretClose').onclick=()=>$('#secretCard').classList.remove('show');
+$('#secretCard').onclick=e=>{if(e.target.id==='secretCard')$('#secretCard').classList.remove('show')};
+function launchConfetti(n){const c=$('#confetti');c.innerHTML='';for(let i=0;i<n;i++){const p=document.createElement('i');p.style.setProperty('--x',Math.random()*100+'%');p.style.setProperty('--d',2.4+Math.random()*3.3+'s');p.style.setProperty('--r',Math.random()*360+'deg');p.style.setProperty('--drift',(Math.random()*220-110)+'px');p.style.animationDelay=Math.random()*.55+'s';p.style.width=2+Math.random()*4+'px';p.style.height=7+Math.random()*13+'px';c.appendChild(p)}}
+
+/* =========================================================
+   06 — LETTER -> FAMILY PHOTO -> FINAL SCREEN / REPLAY
+   ========================================================= */
+$('#photoBtn').onclick=()=>show('photoScene');
+function heartBurst(n){const btn=document.querySelector('#loveBtn'),r=btn.getBoundingClientRect(),gl=['🤍','🤎','✨','💛'];for(let i=0;i<n;i++){const h=document.createElement('span');h.className='heart';h.textContent=gl[Math.floor(Math.random()*gl.length)];h.style.left=(r.left+r.width/2)+'px';h.style.top=r.top+'px';h.style.setProperty('--hx',(Math.random()*170-85)+'px');h.style.setProperty('--hr',(Math.random()*140-70)+'deg');h.style.setProperty('--hd',(1.4+Math.random()*1.3)+'s');h.style.fontSize=(13+Math.random()*16)+'px';document.body.appendChild(h);setTimeout(()=>h.remove(),3000)}}
+$('#loveBtn').onclick=()=>{heartBurst(28);heartFirework(innerWidth*.5,innerHeight*.42,1.4);setTimeout(()=>show('final'),650)};
+
+$('#replay').onclick=()=>{birthdayAudio.pause();birthdayAudio.currentTime=0;birthdayAudio.volume=.42;bgMusic.pause();bgMusic.currentTime=0;userMusicVolume=.10;volumeSlider.value='.10';bgMusic.volume=.10;musicStarted=false;blowStarted=false;code='';render();$('#cake').classList.remove('extinguished');$('#blowBtn').classList.remove('active');$('#blowBtn').disabled=false;$('#blowBtn').innerHTML='<span class="blow-icon">✦</span> Souffler les bougies';$('#micNote').textContent="Le bouton suffit · souffle réel disponible si ton navigateur l'autorise";musicControl.classList.add('paused');$('#secretCard').classList.remove('show');$('#wishCard').classList.remove('show');giftOpened=false;$('#giftWrap').classList.remove('open');$('#giftMsg').textContent='';$('#giftHint').textContent="Appuie sur le cadeau pour l'ouvrir";$('#giftNext').classList.remove('show');buildWishes();if(fxCanvas){fxParts=[];const c=fxCanvas.getContext('2d');c.clearRect(0,0,fxCanvas.width,fxCanvas.height)}show('access')};
+
+const glow=document.createElement('div');glow.style.cssText='position:fixed;z-index:2;pointer-events:none;width:240px;height:240px;border-radius:50%;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(215,189,131,.045),transparent 68%);transition:left .15s,top .15s';document.body.appendChild(glow);addEventListener('pointermove',e=>{glow.style.left=e.clientX+'px';glow.style.top=e.clientY+'px'});
+/* =========================================================
+   07 — ROUND 4 EFFECTS
+   Cursor sparkles · balloons · heart fireworks · sound design
+   gift box · wish constellation
+   ========================================================= */
+
+/* ---- cursor sparkle trail ---- */
+const SPARK_CHARS=['✦','✧','✨','·'];
+let lastSpark=0;
+addEventListener('pointermove',e=>{const now=performance.now();if(now-lastSpark<48)return;lastSpark=now;const s=document.createElement('span');s.className='sparkle';s.textContent=SPARK_CHARS[Math.floor(Math.random()*SPARK_CHARS.length)];s.style.left=e.clientX+'px';s.style.top=e.clientY+'px';s.style.fontSize=(8+Math.random()*9)+'px';document.body.appendChild(s);setTimeout(()=>s.remove(),900)});
+
+/* ---- rising balloons ---- */
+function launchBalloons(n=14){const cols=['#d6bb7c','#e8c07a','#f1dba8','#d98b9b','#8fb0d8','#b7d8a8'];for(let i=0;i<n;i++){const c=cols[i%cols.length];const b=document.createElement('div');b.className='balloon';b.style.left=(4+Math.random()*92)+'vw';b.style.setProperty('--bc',c);b.style.background='radial-gradient(circle at 34% 28%,rgba(255,255,255,.55),'+c+' 62%)';b.style.setProperty('--bd',(5.5+Math.random()*4)+'s');b.style.setProperty('--bx',(Math.random()*180-90)+'px');b.style.animationDelay=(Math.random()*1.8)+'s';b.style.width=(38+Math.random()*28)+'px';b.style.height=(48+Math.random()*36)+'px';document.body.appendChild(b);setTimeout(()=>b.remove(),13000)}}
+
+/* ---- heart-shaped firework (canvas) ---- */
+function heartFirework(cx,cy,scale=1){if(!fxCanvas)return;sizeFx();const colors=['#ffd7e0','#f1dba8','#ff9db4','#fff6dd','#e8c07a'];const N=96;for(let i=0;i<N;i++){const t=Math.PI*2*i/N;const hx=16*Math.pow(Math.sin(t),3);const hy=13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t);const sp=(.5+Math.random()*.22)*scale;fxParts.push({x:cx,y:cy,vx:hx*sp*.34,vy:-hy*sp*.34,life:1,color:colors[Math.floor(Math.random()*colors.length)],size:2.6})}if(!fxRaf)fxLoop()}
+
+/* ---- sound design (Web Audio, no files needed) ---- */
+let AC=null;
+function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch{}}if(AC&&AC.state==='suspended')AC.resume();return AC}
+function tone(freq,dur=.18,type='sine',vol=.12,when=0){if(!CONFIG.soundEffects)return;const c=ac();if(!c)return;const t=c.currentTime+when;const o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.value=freq;o.connect(g);g.connect(c.destination);g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(vol,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.start(t);o.stop(t+dur+.03)}
+function chime(){[880,1320,1760].forEach((f,i)=>tone(f,.5,'sine',.07,i*.05))}
+function pop(){tone(660,.12,'triangle',.10);tone(990,.12,'triangle',.06,.02)}
+function whoosh(){if(!CONFIG.soundEffects)return;const c=ac();if(!c)return;const t=c.currentTime;const buf=c.createBuffer(1,Math.floor(c.sampleRate*.6),c.sampleRate);const d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,2);const src=c.createBufferSource();src.buffer=buf;const f=c.createBiquadFilter();f.type='bandpass';f.Q.value=.8;f.frequency.setValueAtTime(380,t);f.frequency.exponentialRampToValueAtTime(2600,t+.45);const g=c.createGain();g.gain.value=.22;src.connect(f);f.connect(g);g.connect(c.destination);src.start(t)}
+function playBirthdayTune(){if(!CONFIG.playTune)return;const n={G4:392,A4:440,B4:493.9,C5:523.3,D5:587.3,E5:659.3,F5:698.5,G5:784};const seq=[['G4',.3],['G4',.15],['A4',.45],['G4',.45],['C5',.45],['B4',.85],['G4',.3],['G4',.15],['A4',.45],['G4',.45],['D5',.45],['C5',.85],['G4',.3],['G4',.15],['G5',.45],['E5',.45],['C5',.45],['B4',.45],['A4',.85],['F5',.3],['F5',.15],['E5',.45],['C5',.45],['D5',.45],['C5',1.05]];let t=0;seq.forEach(([k,d])=>{tone(n[k],d*.9,'triangle',.085,t);t+=d})}
+
+/* ---- gift box ---- */
+const giftWrap=$('#giftWrap'),giftMsg=$('#giftMsg'),giftHint=$('#giftHint'),giftNext=$('#giftNext');
+let giftOpened=false;
+const GIFT_TEXT="Lamia, J'ai préparé ce cadeau pour toi parce que c'est la seule chose que je puisse faire et que cela te laissera un souvenir.🤍";
+function typeWriter(el,text,done){el.textContent='';let i=0;const cur=document.createElement('span');cur.className='cursor';el.appendChild(cur);const step=()=>{if(i>=text.length){cur.remove();done&&done();return}el.textContent=text.slice(0,i+1);el.appendChild(cur);i++;setTimeout(step,24)};step()}
+function openGift(){if(giftOpened)return;giftOpened=true;giftWrap.classList.add('open');whoosh();chime();heartFirework(innerWidth*.5,innerHeight*.42,1.5);launchConfetti(90);launchBalloons(8);giftHint.textContent='';typeWriter(giftMsg,GIFT_TEXT,()=>giftNext.classList.add('show'))}
+giftWrap.onclick=openGift;
+giftNext.onclick=()=>{buildWishes();show('wishScene')};
+
+/* ---- wish constellation ---- */
+const WISHES=[
+ {t:"Le bonheur",x:"Ta joie est contagieuse. Ne laisse jamais personne l'éteindre."},
+ {t:"La santé",x:"Prends soin de toi comme tu prends soin des autres. Tu comptes énormément."},
+ {t:"La réussite",x:"Tout ce que tu entreprendras avec ton cœur finira par fleurir."},
+ {t:"L'amour",x:"Tu es aimée, plus que tu ne l'imagines. Par ta famille, tes proches… et ici aussi."},
+ {t:"Le courage",x:"Tu es plus forte que tu ne le crois. Regarde tout le chemin déjà parcouru."},
+ {t:"La paix",x:"Que ton esprit trouve du calme, même dans les journées les plus chargées."},
+ {t:"Le rire",x:"Qu'il ne te quitte jamais — c'est ta plus belle lumière."}
+];
+const WISH_POS=[[11,20],[20,72],[34,14],[64,13],[83,22],[89,68],[72,84],[30,86],[50,92],[15,46],[86,46]];
+const wishSky=$('#wishSky'),wishDone=$('#wishDone');
+let wishFound=0,wishOrder=[];
+function buildWishes(){wishSky.innerHTML='';wishFound=0;wishDone.classList.remove('show');$('#wishCaption').textContent='Touche chaque étoile… il y a un mot pour toi derrière chacune.';wishOrder=[...WISH_POS].sort(()=>Math.random()-.5);WISHES.forEach((w,i)=>{const s=document.createElement('div');s.className='wish-star';s.style.left=wishOrder[i][0]+'%';s.style.top=wishOrder[i][1]+'%';s.style.animationDelay=(Math.random()*2)+'s';s.onclick=()=>openWish(i,s);wishSky.appendChild(s)})}
+function openWish(i,s){if(s.classList.contains('found'))return;s.classList.add('found');wishFound++;chime();const r=s.getBoundingClientRect();heartFirework(r.left+r.width/2,r.top+r.height/2,.7);$('#wishNum').textContent='Étoile '+wishFound+' / '+WISHES.length;$('#wishTitle').textContent=WISHES[i].t;$('#wishText').textContent=WISHES[i].x;$('#wishProgress').textContent=wishFound+' étoile'+(wishFound>1?'s':'')+' trouvée'+(wishFound>1?'s':'');$('#wishCard').classList.add('show');if(wishFound>=WISHES.length){wishDone.classList.add('show');$('#wishCaption').textContent='Tu as trouvé toutes tes étoiles. 🤍'}}
+$('#wishClose').onclick=()=>$('#wishCard').classList.remove('show');
+$('#wishCard').onclick=e=>{if(e.target.id==='wishCard')$('#wishCard').classList.remove('show')};
+wishDone.onclick=()=>{$('#wishCard').classList.remove('show');heartFirework(innerWidth*.5,innerHeight*.4,1.9);launchConfetti(120);fireworks(4);launchBalloons(12);show('final')};
+
+/* ---- gift button on the final screen ---- */
+$('#giftBtn').onclick=()=>show('giftScene');
+
+/* build the constellation once at load */
+buildWishes();
+
+</script>
+</body>
+</html>
